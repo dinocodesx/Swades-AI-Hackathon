@@ -4,8 +4,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { Groq } from "groq-sdk";
-import fs from "fs";
 import path from "path";
+import { createReadStream, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 
 const app = new Hono();
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
@@ -39,8 +39,8 @@ const mapSegments = (segments: GroqTranscriptSegment[] | undefined): TranscriptS
 
 // Ensure uploads dir exists
 const uploadsDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir);
 }
 
 app.use(logger());
@@ -88,17 +88,18 @@ app.post("/api/transcribe", async (c) => {
 
   const fileId = Date.now().toString();
   const tempDir = path.join(uploadsDir, fileId);
-  fs.mkdirSync(tempDir, { recursive: true });
+  mkdirSync(tempDir, { recursive: true });
+  const safeFileName = path.basename(audioFile.name).replaceAll(/[^\w.-]/g, "_");
 
-  const inputPath = path.join(tempDir, `input_${audioFile.name}`);
+  const inputPath = path.join(tempDir, `input_${safeFileName}`);
 
   try {
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    fs.writeFileSync(inputPath, buffer);
+    writeFileSync(inputPath, buffer);
 
     const transcription = await groq.audio.transcriptions.create({
-      file: fs.createReadStream(inputPath),
+      file: createReadStream(inputPath),
       model: "whisper-large-v3-turbo",
       response_format: "verbose_json",
       language: "en",
@@ -124,12 +125,8 @@ app.post("/api/transcribe", async (c) => {
     const errorMessage = error instanceof Error ? error.message : "Error processing audio";
     return c.json({ error: errorMessage }, 500);
   } finally {
-    try {
-      if (fs.existsSync(tempDir)) {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-      }
-    } catch (e) {
-      // Ignore cleanup errors silently
+    if (existsSync(tempDir)) {
+      rmSync(tempDir, { recursive: true, force: true });
     }
   }
 });

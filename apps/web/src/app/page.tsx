@@ -18,6 +18,10 @@ type RecentTranscription = {
   createdAt: string;
 };
 
+type ApiErrorResponse = { error?: string };
+type RecentTranscriptionsResponse = { transcriptions?: RecentTranscription[] } & ApiErrorResponse;
+type TranscribeResponse = { text?: string } & ApiErrorResponse;
+
 const formatDate = (value: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -49,13 +53,23 @@ export default function Home() {
   const [isLoadingRecent, setIsLoadingRecent] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleSelectedFile = (selectedFile: File | null) => {
+    if (!selectedFile) {
+      return;
+    }
+
+    setFile(selectedFile);
+    setError("");
+    setTranscription("");
+  };
+
   const fetchRecentTranscriptions = async () => {
     setIsLoadingRecent(true);
     try {
       const res = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/api/transcriptions`);
-      const data = await res.json();
+      const data = (await res.json()) as RecentTranscriptionsResponse;
       if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch transcriptions");
+        throw new Error(data.error ?? "Failed to fetch transcriptions");
       }
       setRecentTranscriptions(Array.isArray(data.transcriptions) ? data.transcriptions : []);
     } catch (err: unknown) {
@@ -71,20 +85,14 @@ export default function Home() {
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setError("");
-      setTranscription("");
-    }
+    const selectedFile = e.target.files?.[0] ?? null;
+    handleSelectedFile(selectedFile);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
-      setError("");
-      setTranscription("");
-    }
+    const selectedFile = e.dataTransfer.files?.[0] ?? null;
+    handleSelectedFile(selectedFile);
   };
 
   const handleTranscribe = async () => {
@@ -106,20 +114,23 @@ export default function Home() {
         body: formData,
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as TranscribeResponse;
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to transcribe");
+        throw new Error(data.error ?? "Failed to transcribe");
       }
 
-      setTranscription(data.text);
+      setTranscription(data.text ?? "");
       await fetchRecentTranscriptions();
-    } catch (err: any) {
-      setError(err.message || "Failed to transcribe");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to transcribe";
+      setError(message);
     } finally {
       setIsTranscribing(false);
     }
   };
+
+  const canPickFile = !file && !isTranscribing;
 
   return (
     <>
@@ -137,7 +148,19 @@ export default function Home() {
                 className="bg-[#6e3635] text-white p-6 rounded-xl flex flex-col justify-between min-h-[200px] hover:shadow-xl transition-all group cursor-pointer"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
-                onClick={() => (!file && !isTranscribing) ? fileInputRef.current?.click() : null}
+                onClick={() => {
+                  if (canPickFile) {
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === " ") && canPickFile) {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <div className="flex justify-between items-start">
                   <span className="material-symbols-outlined text-4xl">{isTranscribing ? 'graphic_eq' : 'cloud_upload'}</span>

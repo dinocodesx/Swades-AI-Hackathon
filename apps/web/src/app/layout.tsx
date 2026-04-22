@@ -24,8 +24,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "my-better-t-app",
-  description: "my-better-t-app",
+  title: "swadesh-ai-transcriber",
+  description: "swadesh-ai-transcriber",
 };
 
 export default function RootLayout({
