@@ -63,35 +63,6 @@ export default function Home() {
   return (
     <>
       <main className="flex-1 flex flex-col min-h-screen bg-[#fcf9f8]">
-        <header className="sticky top-0 z-40 flex items-center justify-between px-8 py-4 bg-[#fcf9f8]/90 backdrop-blur-md border-b border-[#e5e2e1]">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative w-96 group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#88726b] group-focus-within:text-[#893b19] transition-colors">search</span>
-              <input className="w-full pl-10 pr-4 py-2 bg-[#f6f3f2] border-transparent focus:border-[#893b19] focus:ring-0 rounded-lg text-sm transition-all" placeholder="Search transcriptions..." type="text"/>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <button className="p-2 text-[#55433c] hover:bg-[#f0edec] rounded-full transition-colors relative">
-                <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-[#893b19] rounded-full"></span>
-              </button>
-              <button className="p-2 text-[#55433c] hover:bg-[#f0edec] rounded-full transition-colors">
-                <span className="material-symbols-outlined">settings</span>
-              </button>
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#893b19] text-white font-bold rounded-full hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-50">
-              <span className="material-symbols-outlined text-[20px]">add</span>
-              <span>New Recording</span>
-            </button>
-            <div className="flex items-center gap-3 pl-6 border-l border-[#e5e2e1]">
-              <div className="text-right">
-                <p className="text-sm font-bold text-[#1c1b1b]">Admin Mode</p>
-                <p className="text-[10px] text-[#88726b] uppercase tracking-wider">PREMIUM PLAN</p>
-              </div>
-            </div>
-          </div>
-        </header>
 
         <section className="p-8 max-w-[1400px] w-full mx-auto flex-1 h-full">
           <div className="mb-[48px]">
