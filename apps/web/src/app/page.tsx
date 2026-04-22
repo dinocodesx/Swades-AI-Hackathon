@@ -1,14 +1,74 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { env } from "@my-better-t-app/env/web";
+
+type TranscriptSegment = {
+  start: number;
+  end: number;
+  text: string;
+};
+
+type RecentTranscription = {
+  id: number;
+  title: string;
+  size: number;
+  transcriptText: string;
+  transcriptSegments: TranscriptSegment[];
+  createdAt: string;
+};
+
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown date";
+  }
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const formatDuration = (segments: TranscriptSegment[]) => {
+  const durationSeconds = segments.reduce((max, segment) => Math.max(max, segment.end), 0);
+  if (durationSeconds <= 0) {
+    return "No duration";
+  }
+
+  const minutes = Math.max(1, Math.round(durationSeconds / 60));
+  return `${minutes} min${minutes === 1 ? "" : "s"}`;
+};
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcription, setTranscription] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [recentTranscriptions, setRecentTranscriptions] = useState<RecentTranscription[]>([]);
+  const [isLoadingRecent, setIsLoadingRecent] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchRecentTranscriptions = async () => {
+    setIsLoadingRecent(true);
+    try {
+      const res = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/api/transcriptions`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch transcriptions");
+      }
+      setRecentTranscriptions(Array.isArray(data.transcriptions) ? data.transcriptions : []);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to fetch transcriptions";
+      setError(message);
+    } finally {
+      setIsLoadingRecent(false);
+    }
+  };
+
+  useEffect(() => {
+    void fetchRecentTranscriptions();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -53,6 +113,7 @@ export default function Home() {
       }
 
       setTranscription(data.text);
+      await fetchRecentTranscriptions();
     } catch (err: any) {
       setError(err.message || "Failed to transcribe");
     } finally {
@@ -120,42 +181,35 @@ export default function Home() {
                   <h3 className="text-[24px] font-bold text-[#1c1b1b]">Recent Transcriptions</h3>
                   <a className="text-[#893b19] font-bold text-sm hover:underline" href="#">View All</a>
                 </div>
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
-                        <span className="material-symbols-outlined">audio_file</span>
+                {isLoadingRecent ? (
+                  <p className="text-sm text-[#88726b]">Loading recent transcriptions...</p>
+                ) : recentTranscriptions.length === 0 ? (
+                  <p className="text-sm text-[#88726b]">No transcriptions yet. Upload audio to get started.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {recentTranscriptions.map((item) => (
+                      <div className="flex items-center justify-between group" key={item.id}>
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
+                            <span className="material-symbols-outlined">audio_file</span>
+                          </div>
+                          <div>
+                            <p className="font-bold text-[#1c1b1b]">{item.title}</p>
+                            <p className="text-xs text-[#88726b]">
+                              {formatDate(item.createdAt)} • {formatDuration(item.transcriptSegments)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-8">
+                          <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">Completed</span>
+                          <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all" type="button">
+                            <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-[#1c1b1b]">Product Strategy Sync</p>
-                        <p className="text-xs text-[#88726b]">Oct 24, 2023 • 42 mins</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-8">
-                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">Completed</span>
-                      <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
-                        <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                  <div className="flex items-center justify-between group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
-                        <span className="material-symbols-outlined">description</span>
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#1c1b1b]">User Research Interview #12</p>
-                        <p className="text-xs text-[#88726b]">Oct 23, 2023 • 15 mins</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-8">
-                      <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase">In Progress</span>
-                      <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
-                        <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 

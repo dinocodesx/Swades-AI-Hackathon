@@ -1,4 +1,5 @@
 import { env } from "@my-better-t-app/env/server";
+import { db, transcriptions, type TranscriptSegment } from "@my-better-t-app/db";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -8,6 +9,33 @@ import path from "path";
 
 const app = new Hono();
 const groq = new Groq({ apiKey: env.GROQ_API_KEY });
+
+type GroqTranscriptSegment = {
+  start?: number;
+  end?: number;
+  text?: string;
+};
+
+const mapSegments = (segments: GroqTranscriptSegment[] | undefined): TranscriptSegment[] => {
+  if (!Array.isArray(segments)) {
+    return [];
+  }
+
+  return segments.flatMap((segment) => {
+    const text = segment.text?.trim();
+    if (
+      !text ||
+      typeof segment.start !== "number" ||
+      Number.isNaN(segment.start) ||
+      typeof segment.end !== "number" ||
+      Number.isNaN(segment.end)
+    ) {
+      return [];
+    }
+
+    return [{ start: segment.start, end: segment.end, text }];
+  });
+};
 
 // Ensure uploads dir exists
 const uploadsDir = path.join(process.cwd(), "uploads");
@@ -26,6 +54,28 @@ app.use(
 
 app.get("/", (c) => {
   return c.text("OK");
+});
+
+app.get("/api/transcriptions", async (c) => {
+  try {
+    const rows = await db
+      .select({
+        id: transcriptions.id,
+        title: transcriptions.title,
+        size: transcriptions.size,
+        transcriptText: transcriptions.transcriptText,
+        transcriptSegments: transcriptions.transcriptSegments,
+        createdAt: transcriptions.createdAt,
+      })
+      .from(transcriptions)
+      .orderBy(transcriptions.createdAt)
+      .limit(10);
+
+    return c.json({ success: true, transcriptions: rows.reverse() });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Error fetching transcriptions";
+    return c.json({ error: errorMessage }, 500);
+  }
 });
 
 app.post("/api/transcribe", async (c) => {
@@ -50,12 +100,26 @@ app.post("/api/transcribe", async (c) => {
     const transcription = await groq.audio.transcriptions.create({
       file: fs.createReadStream(inputPath),
       model: "whisper-large-v3-turbo",
-      response_format: "json",
+      response_format: "verbose_json",
       language: "en",
       temperature: 0.0,
     });
 
-    return c.json({ success: true, text: transcription.text.trim() });
+    const transcriptText = transcription.text.trim();
+    const transcriptSegments = mapSegments(
+      "segments" in transcription
+        ? (transcription.segments as GroqTranscriptSegment[] | undefined)
+        : undefined,
+    );
+
+    await db.insert(transcriptions).values({
+      title: audioFile.name,
+      size: audioFile.size,
+      transcriptText,
+      transcriptSegments,
+    });
+
+    return c.json({ success: true, text: transcriptText, segments: transcriptSegments });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Error processing audio";
     return c.json({ error: errorMessage }, 500);
