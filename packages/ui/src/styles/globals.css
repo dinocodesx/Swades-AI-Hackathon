@@ -115,6 +115,67 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --color-echo-on-secondary-fixed-variant: #6e3635;
+  --color-echo-tertiary: #5b5148;
+  --color-echo-on-secondary: #ffffff;
+  --color-echo-on-primary-fixed-variant: #7a300e;
+  --color-echo-inverse-surface: #313030;
+  --color-echo-primary-fixed: #ffdbce;
+  --color-echo-inverse-primary: #ffb599;
+  --color-echo-tertiary-fixed-dim: #d2c4b8;
+  --color-echo-primary-fixed-dim: #ffb599;
+  --color-echo-outline-variant: #dbc1b8;
+  --color-echo-surface-variant: #e5e2e1;
+  --color-echo-on-secondary-container: #7a403e;
+  --color-echo-tertiary-fixed: #efe0d4;
+  --color-echo-surface-dim: #dcd9d9;
+  --color-echo-outline: #88726b;
+  --color-echo-secondary-container: #feafac;
+  --color-echo-on-tertiary-fixed: #221a13;
+  --color-echo-on-secondary-fixed: #380c0d;
+  --color-echo-inverse-on-surface: #f3f0ef;
+  --color-echo-on-background: #1c1b1b;
+  --color-echo-surface-container-high: #ebe7e7;
+  --color-echo-secondary: #8a4d4b;
+  --color-echo-secondary-fixed: #ffdad8;
+  --color-echo-secondary-fixed-dim: #ffb3b0;
+  --color-echo-primary: #893b19;
+  --color-echo-surface-bright: #fcf9f8;
+  --color-echo-on-surface-variant: #55433c;
+  --color-echo-on-primary: #ffffff;
+  --color-echo-on-primary-container: #ffe7df;
+  --color-echo-on-primary-fixed: #370e00;
+  --color-echo-background: #fcf9f8;
+  --color-echo-surface-tint: #984623;
+  --color-echo-surface-container-lowest: #ffffff;
+  --color-echo-on-tertiary: #ffffff;
+  --color-echo-on-error-container: #93000a;
+  --color-echo-surface: #fcf9f8;
+  --color-echo-surface-container-low: #f6f3f2;
+  --color-echo-surface-container-highest: #e5e2e1;
+  --color-echo-on-tertiary-fixed-variant: #4f453c;
+  --color-echo-tertiary-container: #74695f;
+  --color-echo-error-container: #ffdad6;
+  --color-echo-on-tertiary-container: #f9eade;
+  --color-echo-primary-container: #a8522e;
+  --color-echo-on-error: #ffffff;
+  --color-echo-surface-container: #f0edec;
+  --color-echo-on-surface: #1c1b1b;
+  --color-echo-error: #ba1a1a;
+
+  --font-headline-lg: "Space Grotesk", sans-serif;
+  --font-body-md: "Manrope", sans-serif;
+  --font-label-sm: "Manrope", sans-serif;
+  --font-body-lg: "Manrope", sans-serif;
+  --font-headline-md: "Space Grotesk", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+
+  --spacing-container-margin: 24px;
+  --spacing-stack-sm: 8px;
+  --spacing-stack-lg: 48px;
+  --spacing-gutter: 16px;
+  --spacing-stack-md: 24px;
+  --spacing-base: 8px;
 }
 
 @layer base {

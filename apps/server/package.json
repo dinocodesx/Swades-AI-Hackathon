@@ -13,12 +13,15 @@
     "@my-better-t-app/db": "*",
     "@my-better-t-app/env": "*",
     "dotenv": "^17.2.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "groq-sdk": "^0.3.3",
     "hono": "^4.8.2",
     "zod": "^4.1.13"
   },
   "devDependencies": {
     "@my-better-t-app/config": "*",
     "@types/bun": "^1.3.4",
+    "@types/fluent-ffmpeg": "^2.1.24",
     "tsdown": "^0.16.5",
     "typescript": "^5"
   }
