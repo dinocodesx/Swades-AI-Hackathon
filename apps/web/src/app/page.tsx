@@ -49,12 +49,12 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to transcribe audio");
+        throw new Error(data.error || "Failed to transcribe");
       }
 
       setTranscription(data.text);
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      setError(err.message || "Failed to transcribe");
     } finally {
       setIsTranscribing(false);
     }
@@ -64,30 +64,16 @@ export default function Home() {
     <>
       <main className="flex-1 flex flex-col min-h-screen bg-[#fcf9f8]">
 
-        <section className="p-8 max-w-[1400px] w-full mx-auto flex-1 h-full">
-          <div className="mb-[48px]">
-            <h2 className="text-[48px] font-bold text-[#1c1b1b] mb-2 leading-tight">Dashboard Overview</h2>
-            <p className="text-[#55433c] text-[18px]">Welcome back. You have 3 hours of recording time available this month.</p>
+        <section className="p-5 lg:p-8 max-w-[1200px] w-full mx-auto flex-1 h-full">
+          <div className="mb-8 lg:mb-10">
+            <h2 className="text-[36px] lg:text-[42px] font-bold text-[#1c1b1b] mb-2 leading-tight">Dashboard Overview</h2>
+            <p className="text-[#55433c] text-[16px] lg:text-[18px]">Welcome back. You have 3 hours of recording time available this month.</p>
           </div>
 
-          <div className="flex flex-col gap-[16px]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-              <div className="bg-[#893b19] text-white p-8 rounded-xl flex flex-col justify-between min-h-[224px] hover:shadow-xl transition-all group cursor-pointer">
-                <div className="flex justify-between items-start">
-                  <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
-                  <span className="text-xs uppercase tracking-widest opacity-60">Real-time</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Record Live</h3>
-                  <p className="text-white/80 text-sm mb-4">Instant transcription with multi-speaker detection.</p>
-                  <div className="flex items-center gap-2 font-bold group-hover:gap-4 transition-all">
-                    Start Session <span className="material-symbols-outlined">arrow_forward</span>
-                  </div>
-                </div>
-              </div>
-
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-start">
+            <div className="flex flex-col gap-4">
               <div
-                className="bg-[#6e3635] text-white p-8 rounded-xl flex flex-col justify-between min-h-[224px] hover:shadow-xl transition-all group cursor-pointer"
+                className="bg-[#6e3635] text-white p-6 rounded-xl flex flex-col justify-between min-h-[200px] hover:shadow-xl transition-all group cursor-pointer"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
                 onClick={() => (!file && !isTranscribing) ? fileInputRef.current?.click() : null}
@@ -97,7 +83,7 @@ export default function Home() {
                   <span className="text-xs uppercase tracking-widest opacity-60">Processing</span>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold mb-2">
+                  <h3 className="text-2xl font-bold mb-2 leading-tight">
                     {file ? file.name : "Upload Audio"}
                   </h3>
                   <p className="text-white/80 text-sm mb-4">
@@ -122,69 +108,81 @@ export default function Home() {
                 </div>
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="audio/*" className="hidden" />
               </div>
+
+              {error && (
+                <div className="p-4 bg-[#ffdad6] text-[#ba1a1a] rounded-xl text-sm border border-[#ba1a1a]/20">
+                  {error}
+                </div>
+              )}
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#e5e2e1]">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-[24px] font-bold text-[#1c1b1b]">Recent Transcriptions</h3>
+                  <a className="text-[#893b19] font-bold text-sm hover:underline" href="#">View All</a>
+                </div>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
+                        <span className="material-symbols-outlined">audio_file</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#1c1b1b]">Product Strategy Sync</p>
+                        <p className="text-xs text-[#88726b]">Oct 24, 2023 • 42 mins</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-8">
+                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">Completed</span>
+                      <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
+                        <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
+                        <span className="material-symbols-outlined">description</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#1c1b1b]">User Research Interview #12</p>
+                        <p className="text-xs text-[#88726b]">Oct 23, 2023 • 15 mins</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-8">
+                      <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase">In Progress</span>
+                      <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
+                        <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {error && (
-              <div className="p-4 bg-[#ffdad6] text-[#ba1a1a] rounded-xl text-sm border border-[#ba1a1a]/20">
-                {error}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#e5e2e1] min-h-[520px]">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-[24px] font-bold text-[#1c1b1b]">Transcription Result</h3>
+                {transcription && (
+                  <button onClick={() => navigator.clipboard.writeText(transcription)} className="text-[#893b19] font-bold text-sm hover:underline">
+                    Copy text
+                  </button>
+                )}
               </div>
-            )}
 
-            {transcription && (
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-[#e5e2e1] animate-in slide-in-from-bottom-4 fade-in">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-[24px] font-bold text-[#1c1b1b]">Transcription Result</h3>
-                  <button onClick={() => navigator.clipboard.writeText(transcription)} className="text-[#893b19] font-bold text-sm hover:underline">Copy text</button>
-                </div>
-                <p className="text-[#1c1b1b] whitespace-pre-wrap leading-relaxed text-[16px] p-6 bg-[#f6f3f2] rounded-lg border border-[#e5e2e1]">
+              {transcription ? (
+                <p className="text-[#1c1b1b] whitespace-pre-wrap leading-relaxed text-[16px] p-5 bg-[#f6f3f2] rounded-lg border border-[#e5e2e1] animate-in slide-in-from-bottom-4 fade-in min-h-[420px]">
                   {transcription}
                 </p>
-              </div>
-            )}
-
-            <div className="bg-white rounded-xl p-8 shadow-sm border border-[#e5e2e1]">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-[24px] font-bold text-[#1c1b1b]">Recent Transcriptions</h3>
-                <a className="text-[#893b19] font-bold text-sm hover:underline" href="#">View All</a>
-              </div>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
-                      <span className="material-symbols-outlined">audio_file</span>
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#1c1b1b]">Product Strategy Sync</p>
-                      <p className="text-xs text-[#88726b]">Oct 24, 2023 • 42 mins</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">Completed</span>
-                    <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
-                      <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
-                    </button>
+              ) : (
+                <div className="h-full min-h-[420px] rounded-lg border border-dashed border-[#dbc1b8] bg-[#f6f3f2] flex items-center justify-center">
+                  <div className="text-center px-8">
+                    <span className="material-symbols-outlined text-5xl text-[#88726b]">notes</span>
+                    <p className="text-[#55433c] text-[16px] mt-3 font-medium">Your transcription will appear here</p>
+                    <p className="text-[#88726b] text-sm mt-2">Upload an audio file on the left and click Process Audio.</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-[#ffe7df] flex items-center justify-center text-[#893b19]">
-                      <span className="material-symbols-outlined">description</span>
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#1c1b1b]">User Research Interview #12</p>
-                      <p className="text-xs text-[#88726b]">Oct 23, 2023 • 15 mins</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-[10px] font-bold uppercase">In Progress</span>
-                    <button className="p-2 opacity-0 group-hover:opacity-100 hover:bg-[#f6f3f2] rounded-full transition-all">
-                      <span className="material-symbols-outlined text-[#88726b]">more_vert</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-
           </div>
         </section>
       </main>
